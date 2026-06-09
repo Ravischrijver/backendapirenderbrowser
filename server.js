@@ -20,6 +20,5 @@ app.get("/proxy", async (req, res) => {
   }
 });
 
-// DIT IS BELANGRIJK
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log("Proxy running on port " + PORT));
