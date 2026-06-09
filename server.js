@@ -1,47 +1,24 @@
-import express from 'express';
-import fetch from 'node-fetch';
-import cors from 'cors';
-import { URL } from 'url';
+import express from "express";
+import fetch from "node-fetch";
+import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT || 10000;
-
 app.use(cors());
-app.use(express.static('public'));
 
-app.get('/proxy', async (req, res) => {
+app.get("/proxy", async (req, res) => {
+  const target = req.query.url;
+  if (!target) return res.status(400).send("Missing url");
+
   try {
-    const target = req.query.url;
-    if (!target) {
-      return res.status(400).send('Missing url parameter');
-    }
-
-    // simpele veiligheidscheck
-    let url;
-    try {
-      url = new URL(target);
-    } catch {
-      return res.status(400).send('Invalid URL');
-    }
-
-    const response = await fetch(url.href, {
-      headers: {
-        'User-Agent': 'RaviProxy/1.0'
-      }
-    });
-
-    const contentType = response.headers.get('content-type') || 'text/html';
-    res.setHeader('Content-Type', contentType);
-
-    // LET OP: hier strippen we geen scripts/gevaarlijke dingen, dit is basic
+    const response = await fetch(target);
+    const contentType = response.headers.get("content-type") || "text/html";
+    res.setHeader("Content-Type", contentType);
     const body = await response.text();
     res.send(body);
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Proxy error');
+    res.status(500).send("Proxy error");
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log("Proxy running on port " + PORT));
